@@ -110,6 +110,9 @@ def order_placed():
 
     if not customer_name or not dish_ids:
         return jsonify({"message": "Invalid Order"}), 400
+    
+    if len(set(dish_ids)) != len(dish_ids):
+        return jsonify({"error": "Duplicate dish_ids are not allowed in a single order"}), 400
 
     orderItems = []
     totalPrice = 0
@@ -136,6 +139,32 @@ def order_placed():
 
     orders.append(order)
     return jsonify({"message": f"Order with order_id {order_id} placed successfully"}), 201
+
+@app.route("/orders", methods=["GET"])
+def get_orders():
+    status_filter = request.args.get("status")
+    if status_filter:
+        filtered_orders = [order for order in orders if order["order_status"] == status_filter]
+    else:
+        filtered_orders = orders
+    return jsonify(filtered_orders), 200
+
+@app.route("/orders/<int:order_id>", methods=["PUT"])
+def update_order_status(order_id):
+    new_status = request.json.get("order_status")
+    
+    for order in orders:
+        if order["order_id"] == order_id:
+            if new_status in ["Preparing", "Ready to pickup", "Delivered"]:
+                order["order_status"] = new_status
+                return jsonify({"message": f"Order {order_id} status updated to {new_status}"}), 200
+            else:
+                return jsonify({"error": "Invalid order_status"}), 400
+    
+    return jsonify({"error": f"Order with order_id {order_id} not found"}), 404
+
+
+
 
 
 

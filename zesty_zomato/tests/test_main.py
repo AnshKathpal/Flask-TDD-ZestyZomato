@@ -87,6 +87,12 @@ class TestZestyZomatoApp(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 400)
 
+        response = self.app.post(
+            "/orders",
+            json={"customer_name": "Ansh", "dish_ids": [1,2,2]}
+        )
+        self.assertEqual(response.status_code, 400)
+
 # Tests for  Order Placed
 
 # Tests for  Update Placed
@@ -96,16 +102,41 @@ class TestZestyZomatoApp(unittest.TestCase):
             "/orders",
             json={"customer_name": "Ansh", "dish_ids": [1, 2, 3]}
         )
+        self.assertEqual(response.status_code, 201)
 
-        orderId = response.get_json().get("message").split()[-1]
+        message = response.get_json().get("message")
+        print(message, "this is the message")
+        order_id = None
+        if message:
+            parts = message.split()
+            print(parts, "these are parts")
+            for part in parts:
+                if part.isdigit(): 
+                    order_id = parts[-1]
+                    order_id = int(part)
+                    print(order_id, "this is orderId")
+                    break
+                    
+        self.assertIsNotNone(order_id, "Order ID not found in response message")
+
         response = self.app.put(
-            f"/orders/{orderId}",
-            json={"order_status": "prepared"}
+            f"/orders/{order_id}",
+            json={"order_status": "Preparing"}
         )
+
         self.assertEqual(response.status_code, 200)
+
+    def test_order_update_invalid(self):
+        response = self.app.put(
+            "/orders/999",
+            json={"order_status": "Preparing"}
+        )
+
+        self.assertEqual(response.status_code, 404)
 
 
 # Tests for  Update Placed
+
 
 
 if __name__ == '__main__':
