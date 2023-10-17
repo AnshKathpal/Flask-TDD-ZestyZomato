@@ -69,9 +69,13 @@ orders = []
 orderCounter = 1
 
 
+
 @app.route("/")
 def homepage():
     return jsonify(menu_data=menu), 200
+
+
+
 
 
 @app.route("/menu", methods=["POST"])
@@ -81,6 +85,9 @@ def create_menu():
         return jsonify({"error": "Invalid JSON Data"}), 400
     menu.append(data)
     return jsonify({'message': 'Menu item created'}), 201
+
+
+
 
 
 @app.route("/menu/<int:dishId>", methods=["PUT"])
@@ -93,6 +100,10 @@ def update_menu(dishId):
     return jsonify({'error': 'Menu item not found'}), 404
 
 
+
+
+
+
 @app.route("/menu/<int:dishId>", methods=["DELETE"])
 def delete_menu(dishId):
     for item in menu:
@@ -100,6 +111,9 @@ def delete_menu(dishId):
             menu.remove(item)
             return jsonify({"message": "Item Deleted"}), 204
     return jsonify({"error": "Item not found"}), 404
+
+
+
 
 
 @app.route("/orders", methods=["POST"])
@@ -140,6 +154,9 @@ def order_placed():
     orders.append(order)
     return jsonify({"message": f"Order with order_id {order_id} placed successfully"}), 201
 
+
+
+
 @app.route("/orders", methods=["GET"])
 def get_orders():
     status_filter = request.args.get("status")
@@ -148,6 +165,9 @@ def get_orders():
     else:
         filtered_orders = orders
     return jsonify(filtered_orders), 200
+
+
+
 
 @app.route("/orders/<int:order_id>", methods=["PUT"])
 def update_order_status(order_id):
